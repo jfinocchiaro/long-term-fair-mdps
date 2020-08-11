@@ -1,6 +1,5 @@
 import numpy as np
 import mdptoolbox.example
-import cvxpy as cp
 import mdp
 
 #Algorithm 2 from Wen wet al. 2019 "Fairness with Dynamics"

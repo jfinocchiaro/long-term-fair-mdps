@@ -1,6 +1,6 @@
 import numpy as np
 import mdptoolbox.example
-import cvxpy as cp
+
 
 #extra functions for the model free algorithm
 #for now, take Gamma to be the identity
