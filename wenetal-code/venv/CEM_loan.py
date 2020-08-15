@@ -122,8 +122,8 @@ policy = policyNetwork.PolicyNetwork(3, policy_net_struct)
 env = envLoan.EnvLoan(state_dim, action_dim, h, epsilon, alpha0, alpha1, beta0, beta1, pZ, I, P, lamda, gamm, h1, h0)
 
 # print(env.set_init_state())
-
-agent = constrainedCEM.ConstrainedCEM(env, policy, n_samples, h, rho, nl, sess, log_folder)
+#Jessie: missing the parameter: equal_opp_thres; plugged in epsilon, but not sure if that's right.
+agent = constrainedCEM.ConstrainedCEM(env, policy, n_samples, h, rho, nl, sess, epsilon, log_folder)
 
 agent.train_demographic_parity()
 # agent.train_equality_of_opportunity(equal_opp_thres)
