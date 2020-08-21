@@ -15,7 +15,7 @@ class Env:
         :return: An initial state of dimension (1,self.state_dim)
         """
         return np.zeros((1, self.state_dim))
-    
+
     def step(self, s, a):
         """
         Draw a random sample with the transition distribution by taking a at state s
@@ -25,7 +25,7 @@ class Env:
         """
         pass
         return s
-    
+
     def objective_G(self, trajs):
         """
         Given a finite-horizon sample trajectory, return its objective value
@@ -33,7 +33,7 @@ class Env:
         :return: G(traj) value
         """
         return 0
-    
+
     def objective_H(self, trajs):
         """
         Given a finite-horizon sample trajectory, return its constraint value
@@ -41,8 +41,8 @@ class Env:
         :return: H(trajs) value
         """
         return 0
-    
-    
+
+
 """ Environment design
         S^{tilde}: R^2 x {0,1},         state space
         A = {0,1},                      action space
@@ -51,12 +51,12 @@ class Env:
             T([alpha, beta+1, z] | [alpha, beta, z], 1) = 1 - p_{alpha, beta} = beta/(alpha+beta)
             T([alpha, beta + epsilon, z] | [alpha, beta, z], 0) = 1
         R: S^{tilde} x A -> R,          reward function for the bank
-            R([alpha, beta, z], 0) = 0
-            R([alpha, beta, z], 1) = (I+P)*alpha/(alpha+beta) - P + lamda*(I+P)^2*alpha*beta/(alpha+beta)/(alpha+beta+1)
+            R([alpha, beta, z], 0) = 0 #reward 0 if person not hired
+            R([alpha, beta, z], 1) = (I+P)*alpha/(alpha+beta) - P + lamda*(I+P)^2*alpha*beta/(alpha+beta)/(alpha+beta+1) #reward if person hired
         d:                              initial distribution
             d([alpha1, beta1, 1]) = pZ
             d([alpha0+alpha1, beta0+beta1, 0]) = 1-pZ
-            
+
     Fairness constraint
     R_{applicant}(s,a) = a
     E[R_{applicant} | z = 1] = E[R_{applicant} | z = 0]
@@ -69,9 +69,9 @@ class EnvLoan(Env):
         self.pZ = pZ
         self.alpha0, self.alpha1, self.beta0, self.beta1 = alpha0, alpha1, beta0, beta1
         self.I, self.P, self.lamda = I, P, lamda
-        
+
         self.h0, self.h1 = h0, h1
-        
+
         super().__init__(state_dim, action_dim, h)
         "discounting factor"
         self.gamm = gamm
@@ -82,7 +82,7 @@ class EnvLoan(Env):
         #                 np.amax([self.I + self.P, self.lamda * (self.I + self.P) ** 2])) / \
         #          np.log(self.gamm)
         # self.h = np.ceil(self.h)
-        
+
     def set_init_state(self, z=None):
         """
         Ramdomly select an initial state and return it
@@ -101,7 +101,7 @@ class EnvLoan(Env):
             state = np.array([[self.alpha0, self.beta0, 0]])
         # state = state.astype(np.float32)
         return state
-    
+
     def set_init_state_abz(self, alpha, beta, z):
         """
         Specify the initial state using the alpha, beta and z values
@@ -112,7 +112,7 @@ class EnvLoan(Env):
         """
         # return np.array([[alpha, beta, z]], dtype=np.float32)
         return np.array([[alpha, beta, z]])
-    
+
     def set_init_distribution(self, z):
         """
         Run the transition system for hz steps to generate the initial distribution for group z.
@@ -132,19 +132,19 @@ class EnvLoan(Env):
 
         dist = np.zeros(hz + 1)
         dist[0] = 1
-            
+
         for ii in range(hz):
             dist_copy = np.zeros(hz+1)
             for jj in range(ii+1):
                 dist_copy[jj] += dist[jj] * (a+ii-jj) / (a+b+ii)
                 dist_copy[jj+1] += dist[jj] * (b+jj) / (a+b+ii)
             dist = dist_copy
-        init_dist = np.zeros((3, hz+1))
-        init_dist[0,:] = np.linspace(hz, 0, hz+1) + a
+        init_dist = np.zeros((3, hz+1)) #why 3?
+        init_dist[0,:] = np.linspace(hz, 0, hz+1) + a #params: start, stop, number of samples.  uniformly spaced over the range.  by this contruction should just be integers from a to a+hz+1
         init_dist[1,:] = np.linspace(0, hz, hz+1) + b
         init_dist[2,:] = dist
         return init_dist
-        
+
     def step(self, s, a):
         """
         s = [[alpha, beta, z]], a \in {0, 1}
@@ -157,13 +157,13 @@ class EnvLoan(Env):
         if len(s.shape) == 1:
             s = np.array([s])
         # s = s.astype(np.float32)
-        
+
         s_prime = s.copy()
         p = np.random.rand(s.shape[0])
-        
+
         if not isinstance(a, list) and not isinstance(a, np.ndarray):
             a = [a]
-        
+
         for ii in range(s.shape[0]):
             if a[ii] == 0:
                 "a = 0"
@@ -174,32 +174,31 @@ class EnvLoan(Env):
                 "a = 1 and repay the loan"
                 # print("case1")
                 s_prime[ii][0] += 1
-                
+
             else:
                 "a = 1 and decline the loan"
                 # print("case2")
                 s_prime[ii][1] += 1
-        
-        # print("s id = "+str(id(s))+", s_prime id = "+str(id(s_prime)))
-        # print("s = "+str(s)+", a = "+str(a)+", s_prime = "+str(s_prime))
+
         return s_prime
-    
+
     def reward(self, s, a):
         """
         State-based reward function for G
         :param s: (a batch of) states [[alpha, beta, z]]
         :param a: (a batch of) actions
         :return: the corresponding reward values
+        :note: r here is rho in the paper
         """
         if len(s.shape) ==1:
             s = np.array([s])
-            
+
         # if not isinstance(a, list):
         #     a = [a]
-          
+
         # print("[reward] s = "+str(s))
         r = np.ones(s.shape[0]) * 2
-        
+
         for ii in range(s.shape[0]):
             if a[ii] == 1:
                 tmp = s[ii][0]+s[ii][1]
@@ -208,12 +207,12 @@ class EnvLoan(Env):
                 # print("[reward] r[ii] = "+str(r[ii])+", s[ii] = "+str(s[ii]))
         if s.shape[0] == 1:
             r = r[0]
-            
+
         if any(r < 0):
             print(r)
-            
+
         return r
-        
+
     def objective_G(self, trajs):
         """
         Given a list of trajectories, return a list of G values corresponding to each trajectory.
@@ -222,21 +221,21 @@ class EnvLoan(Env):
         :return: a list of the length len(trajs)
         """
         # print("len(trajs) = "+str(len(trajs)))
-        
+
         g = [0 for _ in range(len(trajs))]
         for ii in range(len(trajs)):
-            
+
             # print("Length of the " + str(ii) + " trajectory: " + str(len(trajs[ii])))
             # pprint.pprint(trajs[ii])
-            
+
             for jj in range(len(trajs[ii])):
-                g[ii] += self.gamm**jj * self.reward(trajs[ii][jj][0], trajs[ii][jj][1])
+                g[ii] += self.gamm**jj * self.reward(trajs[ii][jj][0], trajs[ii][jj][1]) #calculating Rhat (zeta) on page 5 of paper (left of Algo 2 line 15)
             # print("g[ii] = "+str(g[ii]))
             # print("-- traj --")
-            
+
         # print("g = "+str(g))
         # print("---- objective_G ----")
-        
+
         return g
 
     def objective_G_tricky(self, trajs, z):
@@ -244,7 +243,7 @@ class EnvLoan(Env):
         Tricky objective G, just for debugging.
         """
         # print("len(trajs) = "+str(len(trajs)))
-    
+
         g = [0 for _ in range(len(trajs))]
         for ii in range(len(trajs)):
             if all([s[1]==1 for s in trajs[ii]]):
@@ -253,7 +252,7 @@ class EnvLoan(Env):
                 else:
                     g[ii] = -0.4098
         return g
-        
+
     def objective_H(self, trajs):
         """
         Given a list of trajectories, return a list of H values corresponding to each trajectory

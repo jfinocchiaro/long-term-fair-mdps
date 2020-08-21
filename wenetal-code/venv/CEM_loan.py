@@ -73,7 +73,7 @@ rho = .08
 h = 50
 "h0 is the number of steps to simulate to get the initial distribution for group 0 (with action 1)"
 "h1 is the number of steps to simulate to get the initial distribution for group 1 (with action 1)"
-"For z = 0, 1, there will be (hz+1) initial states"
+"For z = 0, 1, there will be (hz+1) initial states -- hz being h0 or h1; not h * z"
 # h0 = 1
 # h1 = 3
 h0 = 1
@@ -83,19 +83,23 @@ h1 = 5
 n_samples = 100
 nl = 49
 
+#the parameters for the beta distribution for group 0 in the given example
+#how are these parameters tuned?
 alpha0 = 1.4614873
 beta0 = 0.51479711
 
+#the parameters for the beta distribution for group 1 in the given example
 alpha1 = 1.51578208
 beta1 = 0.19009129
 
+#again, how is this chosen?
 # equal_opp_thres = 0.85237955
 equal_opp_thres = 0.82
 
-pZ = 1-0.29294318
-I = 0.17318629
+pZ = 1-0.29294318 #d is the initial distribution, and pZ is the proportion of population in group 1
+I = 0.17318629 #Interest rate - used to calculate bank reward
 # I = 0.041225
-P = 1
+P = 1 # principal on the loan
 lamda = 0.01
 # lamda = 0.01
 # lamda = .5
