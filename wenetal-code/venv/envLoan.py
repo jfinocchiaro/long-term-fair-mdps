@@ -28,7 +28,7 @@ class Env:
 
     def objective_G(self, trajs):
         """
-        Given a finite-horizon sample trajectory, return its objective value
+        Given a finite-horizon sample trajectory, return its *objective* value
         :param trajs: a set of h-step simulation trajectories
         :return: G(traj) value
         """
@@ -36,7 +36,7 @@ class Env:
 
     def objective_H(self, trajs):
         """
-        Given a finite-horizon sample trajectory, return its constraint value
+        Given a finite-horizon sample trajectory, return its *constraint* value
         :param trajs: a set of h-step simulation trajectories
         :return: H(trajs) value
         """
@@ -53,9 +53,10 @@ class Env:
         R: S^{tilde} x A -> R,          reward function for the bank
             R([alpha, beta, z], 0) = 0 #reward 0 if person not hired
             R([alpha, beta, z], 1) = (I+P)*alpha/(alpha+beta) - P + lamda*(I+P)^2*alpha*beta/(alpha+beta)/(alpha+beta+1) #reward if person hired
+
         d:                              initial distribution
             d([alpha1, beta1, 1]) = pZ
-            d([alpha0+alpha1, beta0+beta1, 0]) = 1-pZ
+            d([alpha0, beta0, 0]) = 1-pZ
 
     Fairness constraint
     R_{applicant}(s,a) = a
@@ -188,8 +189,9 @@ class EnvLoan(Env):
         :param s: (a batch of) states [[alpha, beta, z]]
         :param a: (a batch of) actions
         :return: the corresponding reward values
-        :note: r here is rho in the paper
+        :note: r here is R in the paper
         """
+        #TODO: modify to just be an indicator
         if len(s.shape) ==1:
             s = np.array([s])
 
@@ -197,7 +199,7 @@ class EnvLoan(Env):
         #     a = [a]
 
         # print("[reward] s = "+str(s))
-        r = np.ones(s.shape[0]) * 2
+        r = np.ones(s.shape[0]) * 2 #why ones and not zeros?
 
         for ii in range(s.shape[0]):
             if a[ii] == 1:
@@ -257,7 +259,7 @@ class EnvLoan(Env):
         """
         Given a list of trajectories, return a list of H values corresponding to each trajectory
         The H value of each trajectory is the average value of the fairness reward
-        :param trajs: a list of trajectories, each as a list [s_0, a_0, s_1, a_1, ..., s_{h-1}, a_{h-1}]
+        :param trajs: a list of trajectories, each as a list [[s_0, a_0], [s_1, a_1], ..., [s_{h-1}, a_{h-1}]]
         :return: a list of the length len(trajs)
         """
         h = [0 for _ in range(len(trajs))]
