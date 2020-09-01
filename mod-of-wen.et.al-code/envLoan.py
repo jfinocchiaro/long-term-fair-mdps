@@ -89,6 +89,11 @@ class EnvLoan(Env):
         Ramdomly select an initial state and return it
         :param z: binary variable. If none, randomly select one.
         :return: state
+
+        keziah:
+        p: true probability for repaying loan
+        z: group (they consider 2 groups; 0 and 1)
+        pz is initial state distribution 
         """
         if z is None:
             p = np.random.rand(1)
@@ -151,6 +156,8 @@ class EnvLoan(Env):
         s = [[alpha, beta, z]], a \in {0, 1}
         :param s: (a batch of) states
         :param a: (a batch of) action
+               a = 0, means loan denied
+               a = 1, means loan accepted
         :return: the next state (randomly drawn wrt the given transition)
         """
         if isinstance(s, list):
@@ -167,7 +174,7 @@ class EnvLoan(Env):
 
         for ii in range(s.shape[0]):
             if a[ii] == 0:
-                "a = 0"
+                "a = 0" # 
                 # print("case0")
                 s_prime[ii][1] = s_prime[ii][1] + self.epsilon
 
@@ -183,45 +190,73 @@ class EnvLoan(Env):
 
         return s_prime
 
-    def reward(self, s, a):
+    def reward(self, s, a): # Equation (1)
         """
         State-based reward function for G
         :param s: (a batch of) states [[alpha, beta, z]]
         :param a: (a batch of) actions
         :return: the corresponding reward values
-        :note: r here is R in the paper
+        :note: r here is R in the paper 
+        
+        keziah: I think this is actually the agent reward, rho_s,a not the institutional reward, R. I think the next function is for that
+
+        I understand why though you might refer to it as R, because it's basically equation 1 of the paper and it's refered to as the bank reward
+        so it's a bit confusing.
         """
-        #TODO: modify to just be an indicator
+        #TODO: modify to just be an indicator (that would mean making it the agent reward?)
+        # so when I use an indicator, the model converged at the first iteration.
+
+
+
         if len(s.shape) ==1:
             s = np.array([s])
 
-        # if not isinstance(a, list):
-        #     a = [a]
-
-        # print("[reward] s = "+str(s))
-
         r = np.ones(s.shape[0]) * 2 #why ones and not zeros?
 
+        # keziah:
+
+        # It's important to note is that r array elements are not initialised to 1s but rather to 2s. If they had used np.zeros, then everything
+        # would be zeros.
+
+        # I tried out the one with zeros, the major difference I see is the iteration point at which norm constant converges to 1, 
+        # with .ones, it converges at iteration 65, and with zeros, it converges at 74th iteration.
+
+        # norm constant was so small ( 0.008815019180204688) with iteration one when r was initalised to zeros. 
+        # It was 0.01548353454749929 with r initialised to 2. so my assumption is the way r is initalised determines rate of convergence.
+
+
         for ii in range(s.shape[0]):
+            #this would be the definition of the indicator
+            # if a[ii] == 1: 
+            #     r[ii] = 1
+            # else:
+            #     r[ii] = 0
+
+            # this is when we use equation (1) instead
             if a[ii] == 1:
                 tmp = s[ii][0]+s[ii][1]
                 r[ii] += (self.I+self.P)*s[ii][0]/tmp - self.P - \
                     self.lamda*(self.I+self.P)*np.sqrt(s[ii][0]*s[ii][1]/tmp/(tmp+1))
                 # print("[reward] r[ii] = "+str(r[ii])+", s[ii] = "+str(s[ii]))
+                
         if s.shape[0] == 1:
             r = r[0]
 
         if any(r < 0):
             print(r)
+            # also this function printed out the rewards when then I initialised r to zeros. However this was only for the first iteration.
+            # so my assumption is initialising high reward makes convergence faster.
 
         return r
 
-    def objective_G(self, trajs):
+
+    def objective_G(self, trajs): # Rhat (zeta) on page 5 of paper (left of Algo 2 line 15)
         """
         Given a list of trajectories, return a list of G values corresponding to each trajectory.
         The G value of each h-step trajectory is the discounted value
         :param trajs: a list of trajectories, each as a list of [[s_0, a_0], [s_1, a_1], ..., [s_{h-1}, a_{h-1}]]
         :return: a list of the length len(trajs)
+        :note: This is the institutional reward, R, and this function computes the cummulative reward, R, aggregating rewards for each rollout.
         """
         # print("len(trajs) = "+str(len(trajs)))
 
@@ -232,7 +267,7 @@ class EnvLoan(Env):
             # pprint.pprint(trajs[ii])
 
             for jj in range(len(trajs[ii])):
-                g[ii] += self.gamm**jj * self.reward(trajs[ii][jj][0], trajs[ii][jj][1]) #calculating Rhat (zeta) on page 5 of paper (left of Algo 2 line 15)
+                g[ii] += self.gamm**jj * self.reward(trajs[ii][jj][0], trajs[ii][jj][1]) 
             # print("g[ii] = "+str(g[ii]))
             # print("-- traj --")
 
@@ -256,7 +291,7 @@ class EnvLoan(Env):
                     g[ii] = -0.4098
         return g
 
-    def objective_H(self, trajs):
+    def objective_H(self, trajs): 
         """
         Given a list of trajectories, return a list of H values corresponding to each trajectory
         The H value of each trajectory is the average value of the fairness reward
@@ -270,3 +305,6 @@ class EnvLoan(Env):
                 h[ii] += trajs[ii][jj][1]
             h[ii] = h[ii] / len(trajs[ii])
         return h
+
+
+
