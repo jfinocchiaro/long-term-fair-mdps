@@ -5,6 +5,7 @@ from matplotlib import pyplot as plt
 import scipy.stats as stats
 import players
 import random
+import platform_opt
 
 #distribution variables
 lower, upper = 0,1
@@ -13,19 +14,23 @@ cppA = [mu, sigma, upper, lower]
 cppB = [mu, sigma, upper, lower]
 
 # model variables
-T = 100
+T = 200
 M = 300 # M >= T
 M_a, M_b = 150, 150
 PAa, PAb, PBa, PBb = 0.8, 0.01, 0.05, 0.2
 
+PLA, PLB =0.1 ,0.05 #probability of like | group membership
 
 m = 10 #size of unit mass
-v = 2 #utility for sharing, known to both user and platform
-c = 1 #cost of clicking, known to both user and platform
+v = 2 #utility for sharing, known to both user and platform *NOT USED YET*
+c = 1 #cost of clicking, known to both user and platform *NOT USED YET*
 qA = 0.8 #probability of transitioning to player in group A conditioned on old player being in group A
 qB = 0.8 #probability of transitioning to player in group B conditioned on old player being in group B
 
-probshowA = .5 #holder for now, this will be optimized later
+epsilon = 0.1 #approximation parameter for approximately equal probability of showing articles |theta - 1/2| <= epsilon
+
+probshowA = platform_opt.optimize(epsilon, M_a, M, T, PAa, PBa, PLA=PLA, PLB=PLB, muA=cppA[0], muB=cppB[0]) #platform chooses their probability for showing article a by maximizing expected clickthrough rate subject to fairness constraints
+
 old_u = []
 time_data_diff = []
 
@@ -85,11 +90,14 @@ for t in range(1,T+1):
 	time_data_diff.append(np.sum([user.article for user in old_u]) / float(m))
 
 
-plt.plot(time_data_diff)
+plt.plot(time_data_diff, color='black')
 plt.title("Mass of articles being shown over time")
 plt.ylabel("learning towards article $a$ (1) and $b$ (-1)")
 plt.xlabel("timestep t")
 plt.ylim((-1,1))
-plt.axhline(y=0,color='g')
+plt.axhline(y=0,color='grey')
+plt.axhline(y=np.average(time_data_diff),color='blue')
+plt.axhline(y=epsilon,color='red')
+plt.axhline(y=-1 * epsilon,color='red')
 plt.show()
 plt.savefig('article_leaning_overtime.png')
