@@ -13,19 +13,19 @@ cppA = [mu, sigma, upper, lower]
 cppB = [mu, sigma, upper, lower]
 
 # model variables
-T = 20
-M = 50 # M >= T
-M_a, M_b = 25, 25
-PAa, PAb, PBa, PBb = 0.4, 0.01, 0.05, 0.4
+T = 100
+M = 300 # M >= T
+M_a, M_b = 150, 150
+PAa, PAb, PBa, PBb = 0.8, 0.01, 0.05, 0.2
 
 
-m = 5 #size of unit mass
+m = 10 #size of unit mass
 v = 2 #utility for sharing, known to both user and platform
 c = 1 #cost of clicking, known to both user and platform
-qA = 0.8
-qB = 0.8
+qA = 0.8 #probability of transitioning to player in group A conditioned on old player being in group A
+qB = 0.8 #probability of transitioning to player in group B conditioned on old player being in group B
 
-probshowA = .5 #holder variable for now, thi will be optimized later
+probshowA = .5 #holder for now, this will be optimized later
 old_u = []
 time_data_diff = []
 
@@ -82,14 +82,14 @@ for t in range(1,T+1):
 			new_u.append(new_user)
 
 		old_u = new_u
-	print [user.article for user in old_u]
-	print np.sum([user.article for user in old_u])
 	time_data_diff.append(np.sum([user.article for user in old_u]) / float(m))
 
-print time_data_diff
+
 plt.plot(time_data_diff)
 plt.title("Mass of articles being shown over time")
 plt.ylabel("learning towards article $a$ (1) and $b$ (-1)")
 plt.xlabel("timestep t")
+plt.ylim((-1,1))
+plt.axhline(y=0,color='g')
 plt.show()
 plt.savefig('article_leaning_overtime.png')
