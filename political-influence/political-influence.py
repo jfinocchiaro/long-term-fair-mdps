@@ -8,28 +8,34 @@ import random
 import platform_opt
 
 #distribution variables
-lower, upper = 0,1
-mu, sigma = 0.5, 0.1
-cppA = [mu, sigma, upper, lower]
-cppB = [mu, sigma, upper, lower]
+#lower, upper = 0,1
+#mu, sigma = 0.5, 0.1
+#cppA = [mu, sigma, upper, lower]
+#cppB = [mu, sigma, upper, lower]
 
 # model variables
-T = 200
-M = 300 # M >= T
-M_a, M_b = 150, 150
-PAa, PAb, PBa, PBb = 0.8, 0.01, 0.05, 0.2
+T = 100
+M = 200 # M >= T
+M_a, M_b = 100, 100
 
-PLA, PLB =0.1 ,0.05 #probability of like | group membership
 
-m = 10 #size of unit mass
-v = 2 #utility for sharing, known to both user and platform *NOT USED YET*
-c = 1 #cost of clicking, known to both user and platform *NOT USED YET*
-qA = 0.8 #probability of transitioning to player in group A conditioned on old player being in group A
-qB = 0.8 #probability of transitioning to player in group B conditioned on old player being in group B
+P = {('1', '1') : 0.8, ('1', '-1'): 0.01,('-1', '1'):  0.05,('-1', '-1'):  0.2} #indexed (user group, article group).  probability of like | click, user group, article group
+PLnC = {('1', '1') : 0.4, ('1', '-1'): 0.005,('-1', '1'):  0.01,('-1', '-1'):  0.1} #indexed (user group, article group).  probability of like | NO click, user group, article group
 
-epsilon = 0.1 #approximation parameter for approximately equal probability of showing articles |theta - 1/2| <= epsilon
+probclick = {1: 0.5, -1: 0.5} #prob click | group membership
 
-probshowA = platform_opt.optimize(epsilon, M_a, M, T, PAa, PBa, PLA=PLA, PLB=PLB, muA=cppA[0], muB=cppB[0]) #platform chooses their probability for showing article a by maximizing expected clickthrough rate subject to fairness constraints
+
+m = 20 #size of unit mass
+v = {('1', '1'): 3., ('-1', '1'): 1., ('1', '-1'): 1., ('-1', '-1'): 1. } #utility for liking, known to both user and platform, varies by (article shown, user group) pair
+c = {('1', '1'): 1., ('-1', '1'): 1., ('1', '-1'): 1., ('-1', '-1'): 1. } #cost of clicking, known to both user and platform, varies by (article shown, user group) pair
+q = {1: 0.8, -1: 0.8} #transition probability across groups at time t+1; homophily constants
+
+epsilon = 0.4 #approximation parameter for approximately equal probability of showing articles |theta - 1/2| <= epsilon
+
+#probshowA = platform_opt.optimize(epsilon, M_a, M, T, P[('1', '1')], P[('-1', '1')], PLA=problike[1], PLB=problike[-1], muA = probclick[1], muB=probclick[-1]) #platform chooses their probability for showing article a by maximizing expected clickthrough rate subject to fairness constraints
+probshowA = 0.2
+
+print probshowA
 
 old_u = []
 time_data_diff = []
@@ -38,50 +44,46 @@ for t in range(1,T+1):
 	new_u = [] #list of new players that arrive at the timestep
 	#unit mass arrives
 
+
 	if t == 1: #initial mass of users arrives
 		for i in range(m):
 			g = 2 * np.random.binomial(1, float(M_a / M))- 1
-			if g == 1:
-				cpp = [mu,sigma,upper,lower]
-			else:
-				cpp = [mu,sigma,upper,lower] 
-			old_u.append(players.players(group=g, clickprobparams=cpp, article=2 * np.random.binomial(1, probshowA)- 1))
+			old_u.append(players.players(group=g, article=2 * np.random.binomial(1, probshowA)- 1))
+
 	
 	else:
 		for user in old_u:
-				
+			
 			#now users are replaced in place (kinda)
-			if user.group == 1:
-				q = qA
-				cpp = cppA
-			else:
-				q = qB
-				cpp = cppB
-			if random.uniform(0,1) <= q:
-				new_user = players.players(group=user.group, clickprobparams=cpp)
+			if random.uniform(0,1) <= q[user.group]: #if next person is drawn by homophily
+				new_user = players.players(group=user.group)
 				if user.shared == True:
 					new_user.article = user.article
 				else:
 					new_user.article = 2 * np.random.binomial(1, probshowA)- 1 # mechanism to decide which article to share
+				
 			else:
-				new_user = players.players(group=-1 * user.group, clickprobparams=cpp)
+				new_user = players.players(group=-1 * user.group)
 				# mechanism to decide which article to share.
 				new_user.article = 2 * np.random.binomial(1, probshowA)- 1
-			
 
-			#decide if user shares article, according to PAa, PAb, etc.
-			if new_user.group == 1 and new_user.article == 1:
-				if random.uniform(0,1) <= PAa:
+			new_user.clicked = players.calcclick(P[(str(new_user.group), '1')],P[(str(new_user.group), '-1')],probshowA,v=v[(str(new_user.article), str(new_user.group))], c=c[(str(new_user.article), str(new_user.group))])
+
+			#decide if user shares article, according to P.
+			if new_user.group == 1 and new_user.article == 1 and new_user.clicked== 1: #this is wrong, since we want a probability of liking without clicking
+				if random.uniform(0,1) <= P[('1', '1')]:
 					new_user.shared= True
-			elif new_user.group == 1 and new_user.article == -1:
-				if random.uniform(0,1) <= PAb:
+			elif new_user.group == 1 and new_user.article == -1  and new_user.clicked== 1:
+				if random.uniform(0,1) <= P[('1', '-1')]:
 					new_user.shared= True
-			elif new_user.group == -1 and new_user.article == -1:
-				if random.uniform(0,1) <= PBa:
+			elif new_user.group == -1 and new_user.article == -1 and new_user.clicked== 1:
+				if random.uniform(0,1) <= P[('-1', '1')]:
+					new_user.shared= True
+			elif new_user.clicked== 1:
+				if random.uniform(0,1) <= P[('-1', '-1')]:
 					new_user.shared= True
 			else:
-				if random.uniform(0,1) <= PBb:
-					new_user.shared= True
+				new_user.shared = False
 
 			#add user to list
 			new_u.append(new_user)
@@ -97,7 +99,7 @@ plt.xlabel("timestep t")
 plt.ylim((-1,1))
 plt.axhline(y=0,color='grey')
 plt.axhline(y=np.average(time_data_diff),color='blue')
-plt.axhline(y=epsilon,color='red')
-plt.axhline(y=-1 * epsilon,color='red')
+#plt.axhline(y=epsilon,color='red')
+#plt.axhline(y=-1 * epsilon,color='red')
 plt.show()
 plt.savefig('article_leaning_overtime.png')

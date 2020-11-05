@@ -8,7 +8,8 @@ def calcPCt(PC, timestep, PLC1, PLC0):
 		p = calcPCt(PC, timestep-1, PLC1, PLC0)
 		return PC * ( (PLC1 * p) + (PLC0 * (1-p)) )
 
-def calcPC(group, timestep, PAa, PBa, PLA, PLB, muA, muB):
+'''
+def calcPC(group, timestep, PAa, PBa, PLA, PLB, muA=0.5, muB=0.5):
 	if group == 1:
 		g = 1
 		PLC1 = PAa #probability of liking given click
@@ -26,13 +27,15 @@ def calcPC(group, timestep, PAa, PBa, PLA, PLB, muA, muB):
 	#return P(C | group) * np.prod([P(L | C=1, group) * P(C=1|group, t) + P(L | C=0, group) * P(C=0|group, t) for t in range timestep])
 	pc = PC * np.prod([PLC1 * PCt + PLC0 * (1-PCt) for t in range (1,timestep+1)])
 	return pc
+'''
 
-
-def optimize(epsilon, mA, M, T, PAa= 0.8, PBa=0.2, PLA=0.1, PLB=0.05, muA=0.3, muB=0.3):
+#def optimize(epsilon, mA, M, T, PAa= 0.8, PBa=0.2, PLA=0.1, PLB=0.05, muA=0.3, muB=0.3):
+def optimize(epsilon, mA, M, T, PCA, PCB, PLC, PLnC, group=1):
 	pi = float(mA) / M
 	theta = cp.Variable(1)
 
-	obj_vec = [theta * pi * calcPC(1, t, PAa, PBa, PLA, PLB, muA, muB) + (1 - theta) * (1 - pi) * calcPC(-1,t, PAa, PBa, PLA, PLB, muA, muB) for t in range(1, T+1)]
+	#obj_vec = [theta * pi * calcPCt(1, t, PAa, PBa, PLA, PLB, muA, muB) + (1 - theta) * (1 - pi) * calcPCt(-1,t, PAa, PBa, PLA, PLB, muA, muB) for t in range(1, T+1)]
+	obj_vec = [theta * pi * calcPCt(PCA, t, PLC[(str(group), '1')], PLnC[(str(group), '1')]) + (1 - theta) * (1 - pi) * calcPCt(PCB, t, PLC[(str(-1 * group), '1')], PLnC[(str(-1 * group), '1')]) for t in range(1, T+1)]
 	
 
 
@@ -46,8 +49,3 @@ def optimize(epsilon, mA, M, T, PAa= 0.8, PBa=0.2, PLA=0.1, PLB=0.05, muA=0.3, m
 	# print(theta.value)
 	return theta.value[0]
 
-def main():
-	optimize(0.2, 15, 30, 10)
-
-if __name__ == "__main__":
-	main()
