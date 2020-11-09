@@ -18,6 +18,18 @@ T = 100
 M = 200 # M >= T
 M_a, M_b = 100, 100
 
+######### questions and comments #########
+# Not a question, rather comment. Great job with the comments
+# - Is it necessary for number of users to be of the same quantity?
+# - From what I understand, users are either 1 or -1, right? It's a bit confusing, since it's like a label ish, I think the same applies to the group.
+# - I would like to clarify if PAa + PAb = 1 or if PAa + PBa = 1
+# - Here in the code, there is still probability of clicking, shouldn't it be based on the payoff?  
+# I however, I am uncertain about the how we will estimate cost, c and value, v. Is the c the same for all agents in a group? Is it 
+# lower in one group and higher for another? Does it change over time? And the v, how is estimated?
+# - In the overleaf, they seemed to say that unit mass is 1, I am not sure how this value is estimated and why it's deemed a constant. 
+# I however, I am certain it has an effect on the model. My suggestion would be to leave it arbitrary so that with it can change over time.
+# - 
+
 
 P = {('1', '1') : 0.8, ('1', '-1'): 0.01,('-1', '1'):  0.05,('-1', '-1'):  0.2} #indexed (user group, article group).  probability of like | click, user group, article group
 PLnC = {('1', '1') : 0.4, ('1', '-1'): 0.005,('-1', '1'):  0.01,('-1', '-1'):  0.1} #indexed (user group, article group).  probability of like | NO click, user group, article group

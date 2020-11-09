@@ -49,3 +49,75 @@ def optimize(epsilon, mA, M, T, PCA, PCB, PLC, PLnC, group=1):
 	# print(theta.value)
 	return theta.value[0]
 
+
+
+def exposure_constraint(g, s, T, pi_g, theta_g, l_gs, l_g_s, q_g):
+	"""
+	g = group {A, B}
+	s = article source {a, b}
+	T = time horizon
+	pi_g = fraction of users from group g
+	theta_g = fraction of users shown article s
+	l_gs =  number of users from g that click and like or share s 
+	l_g_s = number of users from g' that click and like or share s 
+	q_g = probability user in g is replaced by another user from same group
+
+	"""
+	l = 0
+	for t in T:
+		l += (l_gs[t]*q_g) + (l_g_s[t]*(1-q_g))
+	
+	return ((theta_g*pi_g) + l)
+
+
+def platform_optimize(articles, T, time_A, time_B, theta_a_t, theta_b_t):
+
+	"""
+	Inputs
+	groups = {A, B}
+	articles = {a, b}
+	At time t, {A_t, B_t}
+	Decide fraction of users in A_t and B_t to show the article {a, b}
+	Proportion of users in A_t shown a = theta_a
+	Proportion of users in A_t shown b = 1 - theta_a
+	Proportion of users in B_t shown a = theta_b
+	Proportion of users in B_t shown b = 1 - theta_b
+
+	Problem
+	Maximize l_gs under exposure constraint
+		g = {A, B}, s = {a,b} l_gs = number of users that click, like and share the article
+		exposure constraint = e_gs
+
+
+	"""
+
+	for t in T:
+		A_t = time_A[t]
+		B_t = time_B[t]
+		theta_a = theta_a_t[t]
+		theta_b = theta_b_t[t]
+
+		# we can complete this after the discussion today
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
