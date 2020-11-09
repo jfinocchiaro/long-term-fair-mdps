@@ -54,7 +54,7 @@ epsilon = 0.4 #approximation parameter for approximately equal probability of sh
 #probshowA = platform_opt.optimize(epsilon, M_a, M, T, P[('1', '1')], P[('-1', '1')], PLA=problike[1], PLB=problike[-1], muA = probclick[1], muB=probclick[-1]) #platform chooses their probability for showing article a by maximizing expected clickthrough rate subject to fairness constraints
 probshowA = 0.2
 
-print probshowA
+print(probshowA)
 
 old_u = []
 time_data_diff = []
@@ -67,7 +67,7 @@ for t in range(1,T+1):
 	if t == 1: #initial mass of users arrives
 		for i in range(m):
 			g = 2 * np.random.binomial(1, float(M_a / M))- 1
-			old_u.append(players.players(group=g, article=2 * np.random.binomial(1, probshowA)- 1))
+			old_u.append(players.Player(group=g, article=2 * np.random.binomial(1, probshowA)- 1))
 
 	
 	else:
@@ -75,14 +75,14 @@ for t in range(1,T+1):
 			
 			#now users are replaced in place (kinda)
 			if random.uniform(0,1) <= q[user.group]: #if next person is drawn by homophily
-				new_user = players.players(group=user.group)
+				new_user = players.Player(group=user.group)
 				if user.shared == True:
 					new_user.article = user.article
 				else:
 					new_user.article = 2 * np.random.binomial(1, probshowA)- 1 # mechanism to decide which article to share
 				
 			else:
-				new_user = players.players(group=-1 * user.group)
+				new_user = players.Player(group=-1 * user.group)
 				# mechanism to decide which article to share.
 				new_user.article = 2 * np.random.binomial(1, probshowA)- 1
 

@@ -2,7 +2,7 @@ import numpy as np
 import scipy.stats as stats
 
 #MDP class
-class players:
+class Player:
 
     def __init__(self, group=1, shared=False, article=0, clicked = 0): #, clickprob=0.5 , clickprobparams=[0.5, 0.1, 0, 1]):
         self.group = group
