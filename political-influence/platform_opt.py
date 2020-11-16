@@ -1,5 +1,5 @@
 import numpy as np
-import cvxpy as cp
+#import cvxpy as cp
 
 def calcPCt(PC, timestep, PLC1, PLC0):
 	if timestep == 1:
