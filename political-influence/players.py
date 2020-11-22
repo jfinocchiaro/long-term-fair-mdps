@@ -11,11 +11,13 @@ class Player:
         self.clicked = clicked
         #self.clickprob = calcclickprob(*clickprobparams)
 
-def calcclick(player, t, P, q, thetag=0.5, c = 1, v=1):
+def calcclick(player, t, P, q, theta, c = 1, v=1):
     g = player.group
     s = player.article
+    print(theta)
+    thetag = theta[g]
     if t > 1:
-        return (q[g] * calcclick(player, t-1, P, q, thetag, c, v) * P[(g,s)]) + ((1 - q[ -1 * g]) * P[(g,s)] * calcclick(player, t-1, P, q, thetag, c, v))
+        return (q[g] * calcclick(player, t-1, P, q, theta, c, v) * P[(g,s)]) + ((1 - q[ -1 * g]) * P[(g,s)] * calcclick(player, t-1, P, q, theta, c, v))
     if t == 1:
         p =  P[(g,1)] * thetag + P[(g,-1)] * (1-thetag)
         #print(p)

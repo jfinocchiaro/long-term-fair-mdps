@@ -102,9 +102,13 @@ def platform_optimize(articles, T, time_A, time_B, theta_a_t, theta_b_t):
 
 
 
-
-
-
+def calcthreshold(P, c, v):
+    
+    ret_dict = {}
+    for g in [-1,1]:
+            ret_dict[g] = min(1, max(0, ((c[(g,1)] / v[(g,1)]) - P[(g,-1)]) / (P[(g,1)] - P[(g,-1)])))
+    
+    return ret_dict
 
 
 
