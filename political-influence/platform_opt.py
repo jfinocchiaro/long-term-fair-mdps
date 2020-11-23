@@ -106,7 +106,7 @@ def calcthreshold(P, c, v):
     
     ret_dict = {}
     for g in [-1,1]:
-            ret_dict[g] = min(1, max(0, ((c[(1,g)] / v[(1,g)]) - P[(-1,g)]) / (P[(1,g)] - P[(-1,g)])))
+            ret_dict[g] = min(1, max(0, ((c[(1,g)] / v[(1,g)]) - P[(-1, g)]) / (P[(1,g)] - P[(-1,g)])))
     
     return ret_dict
 
