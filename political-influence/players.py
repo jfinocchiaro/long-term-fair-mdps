@@ -59,3 +59,4 @@ def coin_toss(p):
     '''Mechanism to decide between A (1) or B (-1).'''
     return 2 * np.random.binomial(1, p) - 1
 
+
