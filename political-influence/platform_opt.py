@@ -88,15 +88,22 @@ def l(g,s,t, pi, theta, q, c,v,F):
     ps = psi(c,v,F)
     ti = (g+1) / 2
     if t >= 2:
-        return ps[(g,s)] * (q[g] * (phi(g,s,q,c,v,F) ** (t-2) * l(g,s,1, pi, theta,q,c,v,F) + (1 - q[-g]) * zeta(g,s,q,c,v,F) ** (t-2)* l(-g, s, 1, pi, theta, q,c,v,F) )) 
+        return ((q[g] * l(g,s,t-1, pi, theta, q,c,v,F)) + (1 - q[-g]) * l(-g,s,t-1, pi, theta, q,c,v,F)) * ps[(g,s)]
+        #return ps[(g,s)] * (q[g] * (phi(g,s,q,c,v,F) ** (t-2) * l(g,s,1, pi, theta,q,c,v,F) + (1 - q[-g]) * zeta(g,s,q,c,v,F) ** (t-2)* l(-g, s, 1, pi, theta, q,c,v,F) )) 
     else:
         if s == 1:
             return pi[g] * theta[ti] * ps[(g,1)]
         if s == -1:
             return pi[g] * (1 - theta[ti]) * ps[(g,-1)]
 
+# utility the platform has for user g clicking on article s        
+# indexed by (g,s)        
+unit_util = {(1,1)   : 1.,
+             (1,-1)  : 1.,
+             (-1,1)  : 1.,
+             (-1,-1) : 1.}
 #throwing this one in there 25 Nov... let's go through and delete the other ones that aren't being used.
-def opt(pi, q, T, epsilon,c,v,F):
+def opt(pi, q, T, epsilon,c,v,F, u=unit_util):
     
     '''
     params:
@@ -112,7 +119,7 @@ def opt(pi, q, T, epsilon,c,v,F):
     
     #varaible theta_A, theta_B
     theta = cp.Variable(2)
-    objective = cp.Maximize(cp.sum([l(1,1,t, pi, theta, q, c,v,F) + l(-1,1,t,pi, theta, q, c,v,F) + l(1,-1,t, pi, theta, q, c,v,F) + l(-1,-1,t, pi, theta, q, c,v,F) for t in range(T)]))
+    objective = cp.Maximize(cp.sum([u[(1,1)] * l(1,1,t, pi, theta, q, c,v,F) + u[(-1,1)] * l(-1,1,t,pi, theta, q, c,v,F) + u[(1,-1)] * l(1,-1,t, pi, theta, q, c,v,F) + u[(-1,-1)] *  l(-1,-1,t, pi, theta, q, c,v,F) for t in range(T)]))
     constraints_theta = [0 <= theta[0], theta[0] <= 1, 0 <= theta[1], theta[1] <= 1]
     
     #generate eta, used as constraints.
