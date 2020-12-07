@@ -142,8 +142,8 @@ def opt(pi, q, T, epsilon,c,v,F, u=unit_util):
     th = {}
     
     #TODO: double check this is correct indexing
-    th[1] = max(min(theta.value[0], 1.), 0.)
-    th[-1] = max(min(theta.value[1], 1.), 0.)
+    th[1] = max(min(theta.value[1], 1.), 0.)
+    th[-1] = max(min(theta.value[0], 1.), 0.)
     return th
 
 
