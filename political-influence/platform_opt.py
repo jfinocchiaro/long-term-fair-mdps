@@ -147,3 +147,29 @@ def opt(pi, q, T, epsilon,c,v,F, u=unit_util):
     return th
 
 
+#throwing this one in there 25 Nov... let's go through and delete the other ones that aren't being used.
+def opt_unconstrained(pi, q, T, epsilon,c,v,F, u=unit_util):
+    
+    '''
+    params:
+    pi      : dictionary: proportion of users in each group
+    q       : dictionary: homophily variable
+    T       : int: number of total time steps (max)
+    epsilon : double: fairness violation allowed
+    c       : dictionary indexed (g,s): cost for clicking by group and article
+    v       : dictionary indexed (g,s): value for sharing by group and article
+    F       : dictionary indexed (g,s): alpha and beta parameters for beta distribution
+    '''
+
+    
+    #varaible theta_A, theta_B
+    theta = cp.Variable(2)
+    objective = cp.Maximize(cp.sum([u[(1,1)] * l(1,1,t, pi, theta, q, c,v,F) + u[(-1,1)] * l(-1,1,t,pi, theta, q, c,v,F) + u[(1,-1)] * l(1,-1,t, pi, theta, q, c,v,F) + u[(-1,-1)] *  l(-1,-1,t, pi, theta, q, c,v,F) for t in range(T)]))
+    constraints_theta = [0 <= theta[0], theta[0] <= 1, 0 <= theta[1], theta[1] <= 1]
+    
+    prob = cp.Problem(objective, constraints_theta)
+    prob.solve()
+    th = {}
+    th[1] = max(min(theta.value[1], 1.), 0.)
+    th[-1] = max(min(theta.value[0], 1.), 0.)
+    return th
