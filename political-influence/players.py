@@ -56,7 +56,7 @@ def calcclick(pga, pgb, thetag, v=1.0, c=1.0):
 
     
 def coin_toss(p):
-    '''Mechanism to decide between A (1) or B (-1).'''
-    return 2 * np.random.binomial(1, p) - 1
+    '''Mechanism to decide between A (-1) or B (1).'''
+    return -(2 * np.random.binomial(1, p) - 1)
 
 

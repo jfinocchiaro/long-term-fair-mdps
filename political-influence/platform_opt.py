@@ -34,7 +34,7 @@ unit_util = {(1,1)   : 1.,
              (-1,1)  : 1.,
              (-1,-1) : 1.}
 
-def opt(pi, q, T, epsilon,c,v,F, u=unit_util):
+def opt_constrained(pi, q, T, epsilon,c,v,F, u=unit_util):
     
     '''
     params:
@@ -45,6 +45,7 @@ def opt(pi, q, T, epsilon,c,v,F, u=unit_util):
     c       : dictionary indexed (g,s): cost for clicking by group and article
     v       : dictionary indexed (g,s): value for sharing by group and article
     F       : dictionary indexed (g,s): alpha and beta parameters for beta distribution
+    u       : dictionary with platform's utility for a click.  can be thought of as a price charged.
     '''
 
     
@@ -77,7 +78,6 @@ def opt(pi, q, T, epsilon,c,v,F, u=unit_util):
     return th
 
 
-#throwing this one in there 25 Nov... let's go through and delete the other ones that aren't being used.
 def opt_unconstrained(pi, q, T, epsilon,c,v,F, u=unit_util):
     
     '''

@@ -5,6 +5,7 @@ import pickle as pkl
 #local files being imported
 import platform_opt
 from players import *
+from statistics import variance
 
 
 #runs the model given a strategy theta for showing articles at time step 1.
@@ -64,15 +65,15 @@ def runModel(theta, T, pi, M, P, beta_dist, v,c,q):
         if t == 1:  # initial mass of users arrives
             for i in range(M): # iterating over the size of the unit mass
                 tot_in_model = tot_in_model + 1
-                g = coin_toss(pi_a) # determine players group according to the true group distribution
+                g = coin_toss(pi[-1]) # determine players group according to the true group distribution
                 a = coin_toss(theta[g]) # show article A according to the platform's policy.  (right now, this is just a placeholder)
                 player = Player(group=g, article=a)
                 shown_dict[(a,g)] = shown_dict[(a,g)] + 1
-                if a == 1:
+                if a == -1:
                     num_shown_A = num_shown_A + 1
-                    player.article = 1
-                else:
                     player.article = -1
+                else:
+                    player.article = 1
 
                 P_personal = P
                 P_personal[(a,g)] = np.random.beta(*beta_dist[(a,g)])
@@ -105,7 +106,7 @@ def runModel(theta, T, pi, M, P, beta_dist, v,c,q):
                     # show the previous person's article, regardless of the new user's group    
                     new_user.article = user.article
                     shown_dict[(new_user.article, new_user.group)] = shown_dict[(new_user.article, new_user.group)] + 1
-                    if new_user.article == 1:
+                    if new_user.article == -1:
                         num_shown_A = num_shown_A + 1
 
 
@@ -162,7 +163,6 @@ def get_params(dataset_name):
              -1: 0.56706}          # number of members in groups a and b #estimated from probability_sharing_distributions.ipynb
         pi_a = pi[-1]
 
-        # TODO: DOUBLE CHECK INDEXING IS CORRECT
         # (alpha, beta) values for the beta distribution as a function of article and user groups.
         # beta_dist indexed (article group, user group). 
         beta_dist = {(-1,-1) : (41.45784070052453, 556.8653671739492),
@@ -170,7 +170,6 @@ def get_params(dataset_name):
                     (-1,1) : (6.096475779403813, 1519.8459882514462),
                     (1,1): (2152.960173995409, 23647.671142918956)}
 
-        # TODO: DOUBLE CHECK INDEXING IS CORRECT
         # probability of like | click, user group, article group
         # P indexed (article group, user group). expected values of above beta distribution
         #estimated from probability_sharing_distributions.ipynb
@@ -179,7 +178,6 @@ def get_params(dataset_name):
              (-1,  1):  0.003995,
              (1, 1):  0.08344} 
 
-        # TODO: DOUBLE CHECK INDEXING IS CORRECT
         # player utility for liking, known to both user and platform,
         # v indexed by (article group, user group) pair
         #unclear what these values _should_ be!
@@ -257,3 +255,17 @@ def get_params(dataset_name):
         
     return pi, beta_dist,P,v,c,q
 
+def calc_errorbars(lst, n_std=1):
+    variance_list = []
+    Lst = np.transpose(np.array(lst))
+    for x in Lst:
+        variance_list.append(n_std * np.sqrt(variance(x)))
+
+    #print(variance_list)
+    return variance_list
+
+def loadRuns(filename):
+    infile = open(filename,'rb')
+    new_dict = pkl.load(infile)
+    infile.close()
+    return new_dict
