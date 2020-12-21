@@ -34,7 +34,7 @@ unit_util = {(1,1)   : 1.,
              (-1,1)  : 1.,
              (-1,-1) : 1.}
 
-def opt_constrained(pi, q, T, epsilon,c,v,F, u=unit_util):
+def opt_constrained(pi, q, T, epsilon,c,v,F, exposure_e = 0.0, u=unit_util):
     
     '''
     params:
@@ -52,7 +52,7 @@ def opt_constrained(pi, q, T, epsilon,c,v,F, u=unit_util):
     #varaible theta_A, theta_B
     theta = cp.Variable(2)
     objective = cp.Maximize(cp.sum([u[(1,1)] * l(1,1,t, pi, theta, q, c,v,F) + u[(1,-1)] * l(-1,1,t,pi, theta, q, c,v,F) + u[(-1,1)] * l(1,-1,t, pi, theta, q, c,v,F) + u[(-1,-1)] *  l(-1,-1,t, pi, theta, q, c,v,F) for t in range(T)]))
-    constraints_theta = [0 <= theta[0], theta[0] <= 1, 0 <= theta[1], theta[1] <= 1]
+    constraints_theta = [exposure_e <= theta[0], theta[0] <= 1 - exposure_e, exposure_e <= theta[1], theta[1] <= 1 - exposure_e]
     
     #generate eta, used as constraints.
     eta = {}
