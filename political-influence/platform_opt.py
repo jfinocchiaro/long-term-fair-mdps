@@ -60,9 +60,9 @@ def opt_constrained(pi, q, T, epsilon,c,v,F, exposure_e = 0.0, u=unit_util):
         for g in [-1,1]:
             ti = (g+1) / 2 #theta index.... moving from -1 to 0 and  1 to 1
             if s == -1:
-                eta[(s,g)] = pi[g] * theta[ti] + sum([ l(g,s,t, pi, theta,q,c,v,F) * q[g] + l(-g,s,t, pi, theta,q,c,v,F) * (1 - q[-g]) for t in range(1,T-1)])
+                eta[(s,g)] = pi[g] * theta[ti] + sum([ l(g,s,t, pi, theta,q,c,v,F) * q[g] + l(-g,s,t, pi, theta,q,c,v,F) * (1 - q[-g]) for t in range(1,T)])
             else:
-                eta[(s,g)] = pi[g] * (1-theta[ti]) + sum([ l(g,s,t, pi, theta,q,c,v,F) * q[g] + l(-g,s,t, pi, theta,q,c,v,F) * (1 - q[-g]) for t in range(1,T-1)])
+                eta[(s,g)] = pi[g] * (1-theta[ti]) + sum([ l(g,s,t, pi, theta,q,c,v,F) * q[g] + l(-g,s,t, pi, theta,q,c,v,F) * (1 - q[-g]) for t in range(1,T)])
                 
     
     
