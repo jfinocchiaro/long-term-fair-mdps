@@ -210,8 +210,8 @@ def get_params(dataset_name):
         # (alpha, beta) values for the beta distribution as a function of article and user groups.
         # beta_dist indexed (article group, user group). 
         beta_dist = {(-1,-1) : (1.6421893317945877, 62.9176081976947),
-                    (1,-1) : (1.7187375537951832, 380.1479381108044),
-                    (-1,1) : (1.4779704026249152, 27.402822213177515),
+                    (1,-1) : (1.4779704026249152, 27.402822213177515),
+                    (-1,1) : (1.7187375537951832, 380.1479381108044),
                     (1,1): (39.62421666552372, 506.9074863422272)}
 
         # probability of like | click, user group, article group
@@ -252,8 +252,8 @@ def get_params(dataset_name):
         # (alpha, beta) values for the beta distribution as a function of article and user groups.
         # beta_dist indexed (article group, user group). 
         beta_dist = {(-1,-1) : (2.1955994970845176, 53.70406773206235),
-                    (1,-1) : (0.15985328765176798, 50.82834553323337),
-                    (-1,1) : (0.2547399546219493, 7.443199476254677),
+                    (1,-1) : (0.2547399546219493, 7.443199476254677),
+                    (-1,1) : (0.15985328765176798, 50.82834553323337),
                     (1,1): (2.2966486101771286, 27.58967380064497)}
 
         # probability of like | click, user group, article group
