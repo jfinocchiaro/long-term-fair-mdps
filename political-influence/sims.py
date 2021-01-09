@@ -33,8 +33,8 @@ def runModel(theta, T, pi, M, P, beta_dist, v,c,q):
     time_data_diff = []
     num_players_in_model = [M]
     num_players_Aa = [int(M * pi[-1])]
-    num_players_Ab = [int(M * pi[-1])]
-    num_players_Ba = [int(M * pi[1])]
+    num_players_Ab = [0]
+    num_players_Ba = [0]
     num_players_Bb = [int(M * pi[1])]
     #prob_article_A = []
     #prob_article_A_cum = []
@@ -139,9 +139,9 @@ def runModel(theta, T, pi, M, P, beta_dist, v,c,q):
 
             num_players_in_model.append(len(new_u)) #tracks how many players are being shown articles at all timesteps
             num_players_Aa.append(len([u for u in new_u if u.group == -1 and u.article == -1]))
-            num_players_Ab.append(len([u for u in new_u if u.group == -1 and u.article == 1]))
-            num_players_Ba.append(len([u for u in new_u if u.group == 1 and u.article == -1]))
-            num_players_Bb.append(len([u for u in new_u if u.group == 1 and u.article == 1]))
+            num_players_Ab.append(len([u for u in new_u if u.group == -1 and u.article ==  1]))
+            num_players_Ba.append(len([u for u in new_u if u.group ==  1 and u.article == -1]))
+            num_players_Bb.append(len([u for u in new_u if u.group ==  1 and u.article ==  1]))
             old_u = new_u
 
 
