@@ -43,14 +43,10 @@ def runModel(theta, T, pi, M, P, beta_dist, v,c,q):
     tot_in_model = 0
     t = 1
     pi_a = pi[-1]
-    
-    #dictionaries to keep track of who is shown which articles and who clicks on which articles
-    #indexed (article, user)
 
     while (t <= T) and (t == 1 or len(old_u) > 0):
         num_shown_A = 0 #number of players at this timestep that are shown article A
         new_u = []  # list of new players that arrive at the timestep
-        
         shown_dict = {(1,1):   0,
               (-1,1):  0, 
               (1,-1):  0,
@@ -136,7 +132,7 @@ def runModel(theta, T, pi, M, P, beta_dist, v,c,q):
                     new_u.append(new_user)
                 else: #only add a user to the next round if the previous user shared the article 
                     pass
-            
+
             #tracks how many players are being shown articles at all timesteps
             num_players_in_model.append(len(new_u)) 
             showns_dict.append(shown_dict)
@@ -163,7 +159,7 @@ def saveRuns(lst,filename):
     
     
 def get_params(dataset_name):
-    if dataset_name == 'twitter':
+    if dataset_name == 'twitter_uselections':
         # SIMULATION PARAMS DEPENDING ON DATASET
         # parameters here come from probability_sharing_distributions.ipynb
         pi = {1: 0.43294, 
@@ -206,6 +202,90 @@ def get_params(dataset_name):
         # seems too high to be practical
         q = {-1:  0.9877, 
              1: 1.}
+        
+    if dataset_name == 'twitter_brexit':
+        # SIMULATION PARAMS DEPENDING ON DATASET
+        # parameters here come from probability_sharing_distributions.ipynb
+        pi = {1: 0.47532, 
+             -1: 0.52468}          # number of members in groups a and b #estimated from probability_sharing_distributions.ipynb
+        pi_a = pi[-1]
+
+        # (alpha, beta) values for the beta distribution as a function of article and user groups.
+        # beta_dist indexed (article group, user group). 
+        beta_dist = {(-1,-1) : (1.6421893317945877, 62.9176081976947),
+                    (1,-1) : (1.4779704026249152, 27.402822213177515),
+                    (-1,1) : (1.7187375537951832, 380.1479381108044),
+                    (1,1): (39.62421666552372, 506.9074863422272)}
+
+        # probability of like | click, user group, article group
+        # P indexed (article group, user group). expected values of above beta distribution
+        #estimated from probability_sharing_distributions.ipynb
+        P = {k: beta_dist[k][0] / sum(beta_dist[k])
+                 for k in beta_dist}
+
+        # player utility for liking, known to both user and platform,
+        # v indexed by (article group, user group) pair
+        #unclear what these values _should_ be!
+        v = {( 1,  1):   2000.,
+             (-1,  1):   500.,
+             ( 1, -1):   500.,
+             (-1, -1):   2000. }
+
+        # TODO: DOUBLE CHECK INDEXING IS CORRECT
+        # cost of clicking, known to both user and platform,
+        # c indexed by (article shown, user group)
+        c = {( 1,  1):   1.,
+             (-1,  1):   1.,
+             ( 1, -1):   1.,
+             (-1, -1):   1. }
+
+        # transition probability across groups at time t + 1 
+        # indexed by the first user's group membership
+        # seems too high to be practical
+        q = {-1:  0.68052, 
+             1: 0.38406}
+        
+    if dataset_name == 'twitter_abortion':
+        # SIMULATION PARAMS DEPENDING ON DATASET
+        # parameters here come from probability_sharing_distributions.ipynb
+        pi = {1: 0.627787, 
+             -1: 0.372213}          # number of members in groups a and b #estimated from probability_sharing_distributions.ipynb
+        pi_a = pi[-1]
+
+        # (alpha, beta) values for the beta distribution as a function of article and user groups.
+        # beta_dist indexed (article group, user group). 
+        beta_dist = {(-1,-1) : (2.1955994970845176, 53.70406773206235),
+                    (1,-1) : (0.2547399546219493, 7.443199476254677),
+                    (-1,1) : (0.15985328765176798, 50.82834553323337),
+                    (1,1): (2.2966486101771286, 27.58967380064497)}
+
+        # probability of like | click, user group, article group
+        # P indexed (article group, user group). expected values of above beta distribution
+        #estimated from probability_sharing_distributions.ipynb
+        P = {k: beta_dist[k][0] / sum(beta_dist[k])
+                 for k in beta_dist}
+
+        # player utility for liking, known to both user and platform,
+        # v indexed by (article group, user group) pair
+        #unclear what these values _should_ be!
+        v = {( 1,  1):   2000.,
+             (-1,  1):   500.,
+             ( 1, -1):   500.,
+             (-1, -1):   2000. }
+
+        # TODO: DOUBLE CHECK INDEXING IS CORRECT
+        # cost of clicking, known to both user and platform,
+        # c indexed by (article shown, user group)
+        c = {( 1,  1):   1.,
+             (-1,  1):   1.,
+             ( 1, -1):   1.,
+             (-1, -1):   1. }
+
+        # transition probability across groups at time t + 1 
+        # indexed by the first user's group membership
+        # seems too high to be practical
+        q = {-1:  0.5529954, 
+             1: 0.8169399}
 
         
     elif dataset_name=='facebook':
@@ -276,4 +356,3 @@ def loadRuns(filename):
     new_dict = pkl.load(infile)
     infile.close()
     return new_dict
-
