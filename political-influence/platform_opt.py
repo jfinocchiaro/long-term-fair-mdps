@@ -103,3 +103,40 @@ def opt_unconstrained(pi, q, T, epsilon,c,v,F, u=unit_util):
     th[1] = max(min(theta.value[1], 1.), 0.)
     th[-1] = max(min(theta.value[0], 1.), 0.)
     return th
+
+
+def opt_ratios(pi, q, T,c,v,F, delta_low = 0.5, delta_high=2, exposure_e = 0.0, u=unit_util):
+    
+    '''
+    params:
+    pi      : dictionary: proportion of users in each group
+    q       : dictionary: homophily variable
+    T       : int: number of total time steps (max)
+    epsilon : double: fairness violation allowed
+    c       : dictionary indexed (g,s): cost for clicking by group and article
+    v       : dictionary indexed (g,s): value for sharing by group and article
+    F       : dictionary indexed (g,s): alpha and beta parameters for beta distribution
+    u       : dictionary with platform's utility for a click.  can be thought of as a price charged.
+    '''
+
+    
+    #varaible theta_A, theta_B
+    theta = cp.Variable(2)
+    objective = cp.Maximize(cp.sum([u[(1,1)] * l(1,1,t, pi, theta, q, c,v,F) + u[(1,-1)] * l(-1,1,t,pi, theta, q, c,v,F) + u[(-1,1)] * l(1,-1,t, pi, theta, q, c,v,F) + u[(-1,-1)] *  l(-1,-1,t, pi, theta, q, c,v,F) for t in range(T)]))
+    constraints_theta = [exposure_e <= theta[0], theta[0] <= 1 - exposure_e, exposure_e <= theta[1], theta[1] <= 1 - exposure_e]
+    
+    constraints_ratio = []
+    constraints_ratio.append(delta_low * sum([l(-1,-1,t,  pi, theta, q, c,v,F) for t in range(1,T+1)]) <= sum([l(1,1,t,  pi, theta, q, c,v,F) for t in range(1,T+1)]))
+    constraints_ratio.append(sum([l(1,1,t,  pi, theta, q, c,v,F) for t in range(1,T+1)]) <= delta_high * sum([l(-1,-1,t,  pi, theta, q, c,v,F) for t in range(1,T+1)]))
+    constraints_ratio.append(delta_low *  sum([l(-1,1,t,  pi, theta, q, c,v,F) for t in range(1,T+1)])<= sum([l(1,-1,t,  pi, theta, q, c,v,F) for t in range(1,T+1)]))
+    constraints_ratio.append(sum([l(1,-1,t,  pi, theta, q, c,v,F) for t in range(1,T+1)])<= delta_high * sum([l(-1,1,t,  pi, theta, q, c,v,F) for t in range(1,T+1)]))
+
+    
+    
+    prob = cp.Problem(objective, constraints_theta+constraints_ratio)
+    prob.solve()
+    th = {}
+    
+    th[1] = max(min(theta.value[1], 1.), 0.)
+    th[-1] = max(min(theta.value[0], 1.), 0.)
+    return th
