@@ -19,8 +19,6 @@ M = 200 # M >= T
 M_a, M_b = 100, 100 #number of members in groups a and b
 
 ######### questions and comments #########
-# Not a question, rather comment. Great job with the comments 
-#	- ahh thanks :)
 # - Is it necessary for number of users to be of the same quantity? 
 # 	- no it is not.  They are currently represented by M_a and M_b above
 # - From what I understand, users are either 1 or -1, right? It's a bit confusing, since it's like a label ish, I think the same applies to the group.
