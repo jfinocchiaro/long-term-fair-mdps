@@ -210,8 +210,8 @@ def get_params(dataset_name):
         # v indexed by (user group, article shown) pair
         #unclear what these values _should_ be!
         v = {( 1,  1):   2000.,
-             (-1,  1):   500.,
-             ( 1, -1):   500.,
+             (-1,  1):   200.,
+             ( 1, -1):   200.,
              (-1, -1):   2000. }
 
         
@@ -251,8 +251,8 @@ def get_params(dataset_name):
         # v indexed by (user group, article shown) pair
         #unclear what these values _should_ be!
         v = {( 1,  1):   2000.,
-             (-1,  1):   500.,
-             ( 1, -1):   500.,
+             (-1,  1):   200.,
+             ( 1, -1):   200.,
              (-1, -1):   2000. }
 
         # cost of clicking, known to both user and platform,
@@ -292,8 +292,8 @@ def get_params(dataset_name):
         # v indexed by (article group, user group) pair
         #unclear what these values _should_ be!
         v = {( 1,  1):   2000.,
-             (-1,  1):   500.,
-             ( 1, -1):   500.,
+             (-1,  1):   200.,
+             ( 1, -1):   200.,
              (-1, -1):   2000. }
 
         
@@ -338,10 +338,10 @@ def get_params(dataset_name):
         # player utility for liking, known to both user and platform,
         # v indexed by (article group, user group) pair
         #unclear what these values _should_ be!
-        v = {( 1,  1):   1000.,
-             (-1,  1):   100.,
-             ( 1, -1):   100.,
-             (-1, -1):   1000. }
+        v = {( 1,  1):   2000.,
+             (-1,  1):   200.,
+             ( 1, -1):   200.,
+             (-1, -1):   2000. }
 
         # cost of clicking, known to both user and platform,
         # c indexed by (article shown, user group)
