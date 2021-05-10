@@ -129,15 +129,15 @@ def opt(policy, pi, q, T, c,v,F, epsilon = 0.1, exposure_e = 0.0, delta_low = 0.
 
     prob = cp.Problem(objective, constraints)
     prob.solve()
-    if prob.solve is not None:
+
+    if prob.solve is not None and theta.value is not None:
         th = {}
-        
         th[-1] = max(min(theta.value[1], 1.), 0.)
         th[1] = max(min(theta.value[0], 1.), 0.)
     else:
         th = {1:0, -1:0}
         print("Constraints not feasible")
-        quit()
+        # quit()
 
     return th
 
